@@ -32,7 +32,7 @@ xml.open('get','/getusers',false)
 
 #### 2.2 send()方法
 
-> send()方法的作用是用来发送请求，支持传入参数：null/对象
+> send()方法的作用是用来发送请求，支持传入参数：null/字符串
 
 示例：
 
@@ -42,7 +42,7 @@ xml.send(null)
 xml.sned("name=tom&age=18")  // post传参，需要设置HTTP头，详见3.2章节
 ```
 
-!> 当请求方式为post并传参时，需要在send()中传参;如为get，则在open接口地址后传参
+!> 当请求方式为post并传参时，需要在send()中传参；如为get，则在open()接口地址后传参
 
 
 
@@ -63,7 +63,7 @@ xml.onload = function(){
 }
 ```
 
-!> onload只能监听readyState 等于4时的状态，其他状态值下无法触发onload,若想监听readyState值变化，可以使用onreadystatechange
+!> onload只能监听readyState 等于4时的状态，其他状态值下无法触发onload,若想监听readyState值变化，可以使用onreadystatechange【readyState 值详见3.1章节】
 
 
 
@@ -153,8 +153,235 @@ xml.send(null)
 
 !> 如果使用的是onreadystatechange，请判断readyState和status，否则，将会多次触发该函数导致未知错误
 
+?> status: ajax响应状态值。
 
+
+
+[常见HTTP状态码-菜鸟教程](https://www.runoob.com/http/http-status-codes.html )
 
 
 
 ## JQ中的ajax
+
+
+
+### 1.基本语法
+
+#### 1.1 $.ajax()
+
+```js
+$.ajax({
+    url : '/getusers',
+    data : {},
+    dataType : 'json',
+    type : 'get',
+    async : true,
+    success : function(res){}，
+    error : function(XMLHttpRequest, textStatus, errorThrown){}
+})
+```
+
+##### 1.1.1 参数详解
+
+| 属性/方法 |           描述           |               默认值/参数               |
+| :-------: | :----------------------: | :-------------------------------------: |
+|    url    |         接口地址         |                    -                    |
+|   data    |    发送到服务器的数据    |                  null                   |
+| dataType  | 预期服务器返回的数据类型 |   自动根据 HTTP 包 MIME 信息智能判断    |
+|   type    |         请求方式         |                   get                   |
+|   async   |        同步/异步         |               true(异步)                |
+|  success  |   请求成功后的回调函数   |        data[,textStatus, jqXHR]         |
+|   error   |   请求失败时调用此函数   | XMLHttpRequest, textStatus, errorThrown |
+
+!> error函数的具体参数详见2.1章节
+
+
+
+#### 1.2 $.post()
+
+```js
+$.post('/getusers',{},function(){},'json')
+```
+
+##### 1.2.1 参数详解
+
+|   参数   |                            描述                             | 是否必选 |
+| :------: | :---------------------------------------------------------: | :------: |
+|   url    |                        请求接口地址                         |    是    |
+|   data   |                    待发送 Key/value 参数                    |   可选   |
+| callback |                     发送成功时回调函数                      |   可选   |
+|   type   | 返回内容格式【xml、 html、script、 json、 text、 _default】 |   可选   |
+
+
+
+#### 1.3 $.get()
+
+```js
+$.get('/getusers',{},function(){},'json')
+```
+
+参数：同上述$.post()参数
+
+?> $.get()和$.post()是$.ajax的简写形式，其参数为固定，如果想要使用更多ajax功能，必须使用$.ajax()
+
+
+
+### 2.关于$.ajax()
+
+#### 2.1 error函数
+
+?> error函数在请求失败时触发，该函数接收三个参数：*XMLHttpRequest 对象、错误信息、捕获的异常对象(可选)*
+
+
+
+如果发生了错误，错误信息（第二个参数）除了得到null之外，还可能是"timeout", "error", "notmodified" 和  "parsererror"。
+
+
+
+#### 2.2 success函数
+
+?> success函数在请求成功时触发，该函数接收三个参数：*data, textStatus[可选], jqXHR[可选]*
+
+
+
+data：由服务器返回，并根据dataType参数进行处理后的数据；
+
+textStatus：描述状态的字符串。
+
+jqXHR：在jQuery 1.4.x中，XMLHttpRequest对象，在jQuery 1.5， 成功设置可以接受一个函数数组。每个函数将被依次调用
+
+
+
+### 3.JQ中使用FormData
+
+#### 3.1 FormData的基本使用
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FormData的基本使用</title>
+</head>
+<body>
+    <form id="form">
+        姓名：<input name="username"><br>
+        年龄：<input name="age"><br>
+        <button>点击测试</button>
+    </form>
+    <script>
+        $('button').click(function(){
+            // 因为formdata需要的是一个dom对象，需要将jq对象转为dom对象
+            var fm = $('#form')[0]
+        	var fd = new FormData(fm)
+            console.log(fd.get('username'))  // 获取键名为username的值
+            console.log(fd.append('sex','男'))  // 向fd对象中添加一个键值对 sex:男
+            console.log(fd.set('sex','女'))  // 可以修改fd中已经存在的键值对
+            console.log(fd.set('city','北京'))  // 如果键名不存在，则新增一个
+            console.log(fd.delete('sex'))  // 删除已经存在的键值对
+        })
+    	
+    </script>
+</body>
+</html>
+```
+
+#### 3.2 $.ajax()中使用FormData
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FormData的基本使用</title>
+</head>
+<body>
+    <form id="form">
+        姓名：<input name="username"><br>
+        年龄：<input name="age"><br>
+        <button>点击测试</button>
+    </form>
+    <script>
+        // 记得先引入jq文件
+        $('button').click(function(){
+            // 获取表单数据
+            var fd = new FormData($('#form')[0])
+            $.ajax({
+                url : '/addusers',
+                data : fd,
+                dataType : 'json',
+                type : 'post',
+                success : function(res){
+                    // 在这根据实际需求做响应处理
+                }，
+                contentType : false,
+                processData : false
+            })
+        })
+    </script>
+</body>
+</html>
+
+```
+
+!> $.ajax()中使用FormData比基本语法多了两个属性：*contentType，proseccData*
+
+> contentType:false
+
+?> JQ会默认将contentType设为 application/x-www-form-urlencoded ，所以会导致后端拿不到数据的情况,因为FormData的默认数据类型是multipart/form-data
+
+> processData : false
+
+?> 默认情况下，通过data选项传递进来的数据，如果是一个对象(技术上讲只要不是字符串)，都会处理转化成一个查询字符串，以配合默认内容类型  "application/x-www-form-urlencoded"，因为我们使用的是FormData，所以不需要进行数据处理
+
+
+
+#### 3.2 node服务端接收FormData值会存在的问题
+
+!> 在node服务端，post请求需要借助 body-parser  模块，但body-parser 并不支持 contentType: multipart/form-data 的格式类型，也就是不支持formData格式 ，这会导致前端的post请求发送formdata数据node服务端接收不到的情景
+
+
+
+解决：
+
+> 安装 ***connect-multiparty*** 模块
+
+步骤详解：
+
+①安装模块
+
+```bash
+npm i connect-multiparty 
+```
+
+②引入模块
+
+``` 	js
+const multipart = require('connect-multiparty')
+const mulMiddleware = multipart()
+```
+
+③使用
+
+```js
+router.post('/addusers', mulMiddleware, (req, res) => {
+    console.log(req.body); 
+});
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
