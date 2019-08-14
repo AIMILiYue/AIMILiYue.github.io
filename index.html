@@ -24,6 +24,8 @@
     <br>
     Loading in progress, please wait a moment.
   </div>
+  <!-- <div id="gitalk-container"></div> -->
+  
   <script>
     window.$docsify = {
       name: '',
@@ -57,6 +59,22 @@
   <script src="//unpkg.com/docsify-copy-code"></script>
   <script src="./_media/js/search.js"></script>
   <script src="./_media/js/emoji.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+  <script>
+    var gitalk = new Gitalk({
+      clientID: 'b81bf459ce4690dafd36',
+      clientSecret: '9f52012b429d54b6f22b0d54eb68ee56855e21c7',
+      repo: 'gitalk',
+      owner: 'AIMILiYue',
+      admin: ['AIMILiYue'],
+      id: location.pathname, 
+      distractionFreeMode: true ,
+
+    })
+
+    gitalk.render('gitalk-container')
+  </script>
   <!-- <script>
     if (typeof navigator.serviceWorker !== 'undefined') {
       navigator.serviceWorker.register('sw.js')
