@@ -282,9 +282,13 @@ style属性绑定和class属性绑定极其类似
         },
         methods: {
             sums : function(event){
-                // 这里的event是原生DOM事件
+                // 这里的event是原生DOM事件（事件对象）
                 this.sum ++
-            }
+            },
+            /*sums方法还可以简写为：
+            sums(event){
+            	this.sum ++
+        	}*/
         }
     })
 </script>
@@ -330,9 +334,157 @@ style属性绑定和class属性绑定极其类似
 ```html
 <div id="app">
 	<!-- 点击事件将只会触发一次 (2.1.4 新增)-->
-	<a @click.once="doThis"></a>
+    <a @click.once="doThis"></a>
 </div>
 ```
+
+#### 2.3.3 按键修饰符
+
+```html
+<div id="app">
+	<!-- 只有在 `key` 是 `Enter` 时调用 `vm.submit()` -->
+    <input @keyup.enter="submit">
+    
+    <!-- 还可以这样写 -->
+    <!-- onPageDown函数只会在 $event.key 等于 PageDown 时被调用 -->
+    <input @keyup.page-down="onPageDown">
+</div>
+```
+
+```html
+<script>
+    var app = new Vue({
+        el : '#app',
+        data: {
+        },
+        methods: {
+            onPageDown(){
+                console.log('onPageDown事件被触发了')
+            }
+        }
+    })
+</script>
+```
+
+
+
+### 2.4 计算属性
+
+基本语法：
+
+```html
+<div id="app">
+    <table>
+        <thead>
+            <tr>
+            	<th>ID</th>
+            	<th>姓名</th>
+            	<th>年龄</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 这里循环的是计算属性中的reprocessData，而不是data中的dataArr -->
+        	<tr v-for="item in reprocessData" :key="item.id">
+                <td>{{item.id}}</td>
+                <td>{{item.name}}</td>
+                <td>{{item.age}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+```
+
+```html
+<script>
+    var app = new Vue({
+        create: {
+            // 声明周期函数中调用getData方法来获取数据
+            this.getData()
+        },
+        // 计算属性
+        computed: {
+            // 以函数的形式声明，但使用时当做变量去使用
+            reprocessData(){
+                // 将翻转之后的数据返回
+                return this.dataArr.reverse()
+            }
+        },
+        el : '#app',
+        data: {
+            dataArr: []
+        },
+        methods: {
+            getData(){
+                // 发送axios请求，获取数据（前提：已经引入axios）
+                axios.get('http://127.0.0.1:6666/getdata').then(res=>{
+                    // 将获取到的数据赋值给dataArr
+                    this.dataArr = res.data.result
+                })
+            }
+        }
+    })
+</script>
+```
+
+个人理解：
+
+> 因html中不能有过于复杂的逻辑和数据再处理操作，所以使用computed来进行专门的数据再处理
+
+
+
+### 2.5 其他
+
+#### 	2.5.1 v-model
+
+> 在官方解释中，v-model是专门用来处理用户输入，从而实现表单输入和应用状态之间的双向绑定
+
++ 限制
+
+v-model用于在`<input>`、`<textarea>`及`<select>`表单控件中进行双向绑定
+
+!> v-model会忽略表单元素的`value`、`checked`、`selected`等初始值，而是将vue实例中的data作为数据来源，如果想用初始值，可以在data中声明初始值
+
+```html
+<div id="app">
+    <!-- v-model处理普通文本输入，并实时显示 -->
+    <input v-model="message">
+	
+    <!-- v-model处理textarea输入，并实时显示 -->
+    <textarea v-model="message"></textarea>
+    <p>Message is: {{ message }}</p>
+    
+    <!-- v-model处理单个复选框，并实时显示 -->
+    <input type="checkbox" id="checkbox" v-model="checked">
+    <label for="checkbox">{{ checked }}</label>
+    
+    <!-- 处理多个复选框,需绑定到同一数组中 -->
+    <input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
+  	<label for="jack">Jack</label>
+    <input type="checkbox" id="john" value="John" v-model="checkedNames">
+    <label for="john">John</label>
+    <input type="checkbox" id="mike" value="Mike" v-model="checkedNames">
+    <label for="mike">Mike</label>
+    <br>
+    <span>Checked names: {{ checkedNames }}</span>
+    
+</div>
+
+```
+
+```html
+<script>
+    var app = new Vue({
+        el : '#app',
+        data: {
+            message: ''，
+            checked: false，
+            checkedNames: []
+        }
+    })
+</script>
+```
+
+
 
 
 
